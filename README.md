@@ -74,7 +74,7 @@ To run this project locally, follow these steps:
 ### **1. Clone the Repository:**
 
 ```bash
-git clone https://github.com/hallelx2/breast-cancer.git
+git clone https://github.com/hallelx2/breast-cancer-detection.git
 cd breast-cancer-detection
 ```
 
