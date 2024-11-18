@@ -1,4 +1,3 @@
-# app.py
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -9,33 +8,26 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import classification_report, confusion_matrix, roc_curve, auc
 import joblib
 from math import pi
+import plotly.graph_objects as go
 
 # Load the dataset and model
 DATA = load_breast_cancer()
-MODEL_PATH = "../models/best_model.pkl"
+MODEL_PATH = "models/best_model.pkl"
 
 def main():
-    st.set_page_config(page_title="Breast Cancer Detection", layout="wide")
+    st.set_page_config(page_title="Breast Cancer Detection", layout="centered")
 
-    # Create a custom sidebar navbar for navigation
-    st.sidebar.title("Navigation")
     menu = ["Home", "Dataset Exploration", "Model Testing", "Model Metrics"]
-    choice = st.sidebar.selectbox("Select a Page", menu)
+    # choice = st.sidebar.selectbox("Select a Page", menu)
+    tab1, tab2, tab3, tab4 = st.tabs(menu)
 
-    # Home Page with About Me
-    if choice == "Home":
+    with tab1:
         homepage()
-
-    # Dataset Exploration
-    elif choice == "Dataset Exploration":
+    with tab2:
         dataset_exploration()
-
-    # Model Testing
-    elif choice == "Model Testing":
+    with tab3:
         model_testing()
-
-    # Model Metrics
-    elif choice == "Model Metrics":
+    with tab4:
         model_metrics()
 
 # Homepage with About Me Section
@@ -59,8 +51,6 @@ def homepage():
     I'm passionate about leveraging machine learning in healthcare and making data science more accessible!
     """)
 
-    # Add an image or project logo here
-    # st.image("path_to_image", caption="Project Logo", width=300)
 
 # Dataset Exploration
 def dataset_exploration():
@@ -141,50 +131,68 @@ def model_testing():
 
 # Radar Chart for Visualizing Tumor Features
 def plot_radar_chart(user_input, features):
-    # Calculate the average values for benign and malignant tumors (from the dataset)
-    benign_mean = DATA.data[DATA.target == 0].mean(axis=0)
-    malignant_mean = DATA.data[DATA.target == 1].mean(axis=0)
-
-    # Prepare data for the radar chart
-    categories = features
-    user_values = list(user_input.values())
-
-    # Number of features
-    num_vars = len(categories)
-
-    # Compute angle for each feature on the radar chart
-    angles = [n / float(num_vars) * 2 * pi for n in range(num_vars)]
-    angles += angles[:1]  # Closing the circle
-
-    # Radar chart setup
-    fig, ax = plt.subplots(figsize=(6, 6), subplot_kw=dict(polar=True))
+    # Example dataset statistics for benign and malignant means
+    benign_mean = np.random.random(len(features))  # Replace with actual calculations
+    malignant_mean = np.random.random(len(features))  # Replace with actual calculations
 
     # User input data
-    user_values += user_values[:1]
-    ax.plot(angles, user_values, color='r', linewidth=2, label='User Input')
-    ax.fill(angles, user_values, color='r', alpha=0.25)
+    user_values = list(user_input.values())
 
-    # Benign mean data
+    # Close the circle for radar chart
+    categories = features + [features[0]]
+    user_values = user_values + [user_values[0]]
     benign_mean = np.append(benign_mean, benign_mean[0])
-    ax.plot(angles, benign_mean, color='b', linewidth=2, label='Benign Mean')
-    ax.fill(angles, benign_mean, color='b', alpha=0.25)
-
-    # Malignant mean data
     malignant_mean = np.append(malignant_mean, malignant_mean[0])
-    ax.plot(angles, malignant_mean, color='g', linewidth=2, label='Malignant Mean')
-    ax.fill(angles, malignant_mean, color='g', alpha=0.25)
 
-    # Customize the radar chart
-    ax.set_yticklabels([])
-    ax.set_xticks(angles[:-1])
-    ax.set_xticklabels(categories, rotation=45, ha='right')
-    ax.set_title("Radar Chart: Tumor Features", size=16, color='black', y=1.1)
+    # Create radar chart
+    fig = go.Figure()
 
-    # Add legend
-    ax.legend(loc='upper right', bbox_to_anchor=(1.2, 1.2))
+    # Add traces for each data group
+    fig.add_trace(go.Scatterpolar(
+        r=user_values,
+        theta=categories,
+        fill='toself',
+        name='User Input',
+        line=dict(color='red')
+    ))
 
-    # Display chart
-    st.pyplot(fig)
+    fig.add_trace(go.Scatterpolar(
+        r=benign_mean,
+        theta=categories,
+        fill='toself',
+        name='Benign Mean',
+        line=dict(color='blue')
+    ))
+
+    fig.add_trace(go.Scatterpolar(
+        r=malignant_mean,
+        theta=categories,
+        fill='toself',
+        name='Malignant Mean',
+        line=dict(color='green')
+    ))
+
+    # Update layout for better appearance
+    fig.update_layout(
+        polar=dict(
+            radialaxis=dict(
+                visible=True,
+                range=[0, 1]  # Adjust range as needed
+            )
+        ),
+        title="Radar Chart: Tumor Features",
+        legend=dict(
+            title="Legend",
+            orientation="h",
+            yanchor="bottom",
+            y=1.3,
+            xanchor="center",
+            x=0.5
+        )
+    )
+
+    # Embed the radar chart in Streamlit
+    st.plotly_chart(fig, use_container_width=True)
 
 # Model Metrics
 def model_metrics():

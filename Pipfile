@@ -10,6 +10,7 @@ matplotlib = "*"
 scikit-learn = "*"
 joblib = "*"
 streamlit = "*"
+plotly = "*"
 
 [dev-packages]
 
